@@ -1,0 +1,73 @@
+---
+title: "Untitled1"
+author: "Isaac Schroeder"
+date: "December 1, 2017"
+output: html_document
+---
+
+# tidyr examples
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+#example datasets
+```{r}
+AirPassengers
+```
+
+https://github.com/OHI-Science/data-science-training/blob/master/data/gapminder_wide.csv 
+```{r}
+gapwide <-readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder_wide.csv')
+
+gapminder <- readr::read_csv('https://raw.githubusercontent.com/OHI-Science/data-science-training/master/data/gapminder.csv')
+
+```
+
+# gather()
+# use gather to turn gap_wide into a long format dataset
+```{r}
+gap_long<-gapwide %>% 
+  gather(key = obstype_year, 
+         value = obs_values,
+         dplyr::starts_with("pop"),
+         dplyr::starts_with("lifeExp"),
+         dplyr::starts_with("gdpPercap"))
+```
+
+## the :: indicate that starts_with comes from the dplyr package
+
+```{r}
+gap_long<-gapwide %>% 
+  gather(key=obstype_year, 
+         value = obs_values,
+         -continent, -country)
+head(gap_long)
+```
+
+## separate out the year
+```{r}
+gap_long <- gapwide %>% 
+  gather(key = obstype_year,
+         value=obs_values,
+         -continent, -country) %>% 
+  separate(obstype_year,
+           into = c("obs_type","year"),
+           sep = "_",
+           convert=T)
+```
+
+## plot long format data
+```{r}
+life_df <- gap_long %>% 
+  filter(obs_type=="lifeExp",
+         continent == "Americas")
+head(life_df)
+
+ggplot(data=life_df,aes(x=year,y=obs_values, color=country)) +
+  geom_line()
+```
+
